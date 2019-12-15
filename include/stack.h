@@ -5,40 +5,36 @@
 #include <string>
 #include <algorithm>
 template<typename T>
-void quickSort(T* numbers, T left, T right)
+void qsort(T* a, int left, int right )
 {
-	T pivot; // разрешающий элемент
-	T l_hold = left; //левая граница
-	T r_hold = right; // правая граница
-	pivot = numbers[left];
-	while (left < right) // пока границы не сомкнутся
-	{
-		while ((numbers[right] >= pivot) && (left < right))
-			right--; // сдвигаем правую границу пока элемент [right] больше [pivot]
-		if (left != right) // если границы не сомкнулись
-		{
-			numbers[left] = numbers[right]; // перемещаем элемент [right] на место разрешающего
-			left++; // сдвигаем левую границу вправо
+	if (right > left) {
+		int j = -1;
+		for (int i = 0; i < right;) {
+			if (a[i] > a[right]) {
+				if(j == -1)
+				j = i;
+				while (a[i] > a[right]) {
+					i++;
+				}
+			}
+			else {
+				if (j != -1) {
+					std::swap(a[i], a[j]);
+					j++;
+				}
+				i++;
+			}
 		}
-		while ((numbers[left] <= pivot) && (left < right))
-			left++; // сдвигаем левую границу пока элемент [left] меньше [pivot]
-		if (left != right) // если границы не сомкнулись
-		{
-			numbers[right] = numbers[left]; // перемещаем элемент [left] на место [right]
-			right--; // сдвигаем правую границу вправо
-		}
+		if (j != -1)
+			std::swap(a[right], a[j]);
+		else
+			j = right;
+		qsort(a, left, j - 1);
+		qsort(a, j + 1, right);
 	}
-	numbers[left] = pivot; // ставим разрешающий элемент на место
-	pivot = left;
-	left = l_hold;
-	right = r_hold;
-	if (left < pivot) // Рекурсивно вызываем сортировку для левой и правой части массива
-		quickSort(numbers, left, pivot - 1);
-	if (right > pivot)
-		quickSort(numbers, pivot + 1, right);
 }
 template<typename T>
-std::vector<T> qsort(std::vector<T> v) {
+std::vector<T> Qsort(std::vector<T> v) {
 	if (v.size() != 0) {
 		int k = v.size() / 2;
 		std::vector<T> vm;
@@ -54,8 +50,8 @@ std::vector<T> qsort(std::vector<T> v) {
 
 		}
 		if (vm.size() > 1 || vb.size() > 1) {
-			std::vector<T> v1 = qsort(vm);
-			std::vector<T> v2 = qsort(vb);
+			std::vector<T> v1 = Qsort(vm);
+			std::vector<T> v2 = Qsort(vb);
 			v1.push_back(v[k]);
 			for (i = 0; i < v2.size(); i++)
 				v1.push_back(v2[i]);
@@ -92,6 +88,9 @@ public:
 	private:
 		Node<T>* elem;
 	public:
+		iterator() {
+			elem = nullptr;
+		}
 		iterator(Node<T>* elem) { this->elem = elem; }
 		void operator++(int) { elem = elem->next; }
 		T& operator*() { return elem->data; }
@@ -103,11 +102,11 @@ public:
 			elem = it.elem;
 			return *this;
 		}
-		void swap( iterator it2) {
-			Node<T>* a;
-			a = elem;
-			this->elem = it2.elem;
-			it2.elem = a;
+		void swap( iterator& it2) {
+			List<T>::iterator it;
+			it = *this;
+			*this = it2;
+			it2 = it;
 		}
 		friend class List;
 	};
@@ -639,21 +638,30 @@ public:
 				else
 					if ((*it1).degnum == (*it2).degnum) {
 						l.coeff = (*it1).coeff;
+						l.degnum = (*it1).degnum;
 						it1++;
-						it1.swap(it2);
+						if (it1 != lst.end())
+							it1.swap(it2);
+
 
 					}
 					else
 						it1.swap(it2);
 			}
 			while (it2 != lst.end()) {
-				l = *it2;
+				l.coeff += (*it2).coeff;
+				l.degnum = (*it2).degnum;
 				lst1.push_back(l);
+				l.coeff = 0;
 				it2++;
 			}
 			q.lst = lst1;
 			q.faza = 1;
 			return q;
+		}
+		else {
+			std::exception ex("operation not available");
+			throw ex;
 		}
 	}
 
@@ -692,78 +700,89 @@ public:
 			return q;
 
 		}
+		else {
+			std::exception ex("operation not available");
+			throw ex;
+		}
 	}
 
 	std::string printp() {
-		std::string str;
-		int a;
-		List<link>::iterator it = lst.begin();
-		while (it != lst.end()) {
-			if (std::abs((*it).coeff) == 1) {
-				if ((*it).coeff < 0)
-					if ((*it).degnum != 0)
-						str += '-';
+		if ((faza == 1)) {
+			std::string str;
+			int a;
+			List<link>::iterator it = lst.begin();
+			while (it != lst.end()) {
+				if (std::abs((*it).coeff) == 1) {
+					if ((*it).coeff < 0)
+						if ((*it).degnum != 0)
+							str += '-';
+						else
+							str += std::to_string((*it).coeff);
 					else
-						str += std::to_string((*it).coeff);
+						if ((*it).degnum == 0)
+							str += std::to_string((*it).coeff);
+				}
 				else
-					if((*it).degnum == 0)
+					if ((*it).coeff != 0) {
 						str += std::to_string((*it).coeff);
-			}
-			else
+						if ((*it).degnum != 0)
+							str += '*';
+					}
 				if ((*it).coeff != 0) {
-					str += std::to_string((*it).coeff);
-					if((*it).degnum != 0)
-					str += '*';
-				}
-			if ((*it).coeff != 0) {
-				if ((*it).degnum / 100 != 0) {
-					if ((*it).degnum / 100 == 1) {
-						str += 'X';
-						if ((*it).degnum % 100 != 0)
-							str += '*';
+					if ((*it).degnum / 100 != 0) {
+						if ((*it).degnum / 100 == 1) {
+							str += 'X';
+							if ((*it).degnum % 100 != 0)
+								str += '*';
+						}
+						else {
+							str += 'X';
+							str += '^';
+							str += std::to_string((*it).degnum / 100);
+							if ((*it).degnum % 100 != 0)
+								str += '*';
+						}
 					}
-					else {
-						str += 'X';
-						str += '^';
-						str += std::to_string((*it).degnum / 100);
-						if ((*it).degnum % 100 != 0)
-							str += '*';
+					a = (*it).degnum % 100;
+					if (a / 10 != 0) {
+						if (a / 10 == 1) {
+							str += 'Y';
+							if (a % 10 != 0)
+								str += '*';
+						}
+						else {
+							str += 'Y';
+							str += '^';
+							str += std::to_string(a / 10);
+							if (a % 10 != 0)
+								str += '*';
+						}
 					}
-				}
-				a = (*it).degnum % 100;
-				if (a / 10 != 0) {
-					if (a / 10 == 1) {
-						str += 'Y';
-						if (a % 10 != 0)
-							str += '*';
-					}
-					else {
-						str += 'Y';
-						str += '^';
-						str += std::to_string(a / 10);
-						if (a % 10 != 0)
-							str += '*';
-					}
-				}
-				a = a % 10;
-				if (a != 0) {
-					if (a == 1) {
-						str += 'Z';
-					}
-					else {
-						str += 'Z';
-						str += '^';
-						str += std::to_string(a);
+					a = a % 10;
+					if (a != 0) {
+						if (a == 1) {
+							str += 'Z';
+						}
+						else {
+							str += 'Z';
+							str += '^';
+							str += std::to_string(a);
+						}
 					}
 				}
+				it++;
+				if (it != lst.end() && (*it).coeff > 0)
+					if(!str.empty())
+					str += '+';
 			}
-			it++;
-			if (it != lst.end() && (*it).coeff > 0)
-				str += '+';
+			if (str.empty())
+				str += '0';
+			return str;
 		}
-		if (str.empty())
-			str += '0';
-		return str;
-	}
 	
+		else {
+			std::exception ex("operation not available");
+			throw ex;
+		}
+	}
 };
