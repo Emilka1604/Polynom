@@ -2,7 +2,7 @@
 #include <ctime>
 const  unsigned int N = 100000;
 void main() {
-	int a[N];
+	/*int a[N];
 	int i;
 	for (i = 0; i < N; i++) {
 		//a[i] = rand() % 1000;
@@ -12,11 +12,15 @@ void main() {
 		std::cout << a[i] << " ";
 	}
 	std::cout << '\n' << '\n';*/
-	int start = clock();
+	/*int start = clock();
 	qsort(a, 0, N-1);
-	int finish = clock();
-	std::cout << finish - start;
+	int finish = clock();*/
+	//std::cout << finish - start;
 	/*for (int i = 0; i < N; i++) {
 		std::cout << a[i] << " ";
 	}*/
+	polynom p, m, z;
+	p.parser("Z^9-X");
+	m.parser("Z^9");
+	z = p * m;
 }

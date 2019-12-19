@@ -5,32 +5,34 @@
 #include <string>
 #include <algorithm>
 template<typename T>
+int PARTITION(T* a, int left, int right) {
+	T b;
+	T k = a[right];
+	int i = left - 1;
+	int j = left;
+	while (j < right) {
+		if (a[j] <= k) {
+			i++;
+			b = a[i];
+			a[i] = a[i + 1];
+			a[i + 1] = b;
+			//std::swap(a[i], a[j]);
+		}
+		j++;
+	}
+	//std::swap(k, a[i + 1]);
+	b = a[k];
+	a[k] = a[i + 1];
+	a[i + 1] = b;
+	return i + 1;
+}
+template<typename T>
 void qsort(T* a, int left, int right )
 {
 	if (right > left) {
-		int j = -1;
-		for (int i = 0; i < right;) {
-			if (a[i] > a[right]) {
-				if(j == -1)
-				j = i;
-				while (a[i] > a[right]) {
-					i++;
-				}
-			}
-			else {
-				if (j != -1) {
-					std::swap(a[i], a[j]);
-					j++;
-				}
-				i++;
-			}
-		}
-		if (j != -1)
-			std::swap(a[right], a[j]);
-		else
-			j = right;
-		qsort(a, left, j - 1);
-		qsort(a, j + 1, right);
+		int q = PARTITION(a, left, right);
+		qsort(a, left, q - 1);
+		qsort(a, q + 1, right);
 	}
 }
 template<typename T>
@@ -679,6 +681,7 @@ public:
 
 	polynom operator*(polynom& p) {
 		if ((faza == 1) && (p.faza == 1)) {
+			int i;
 			polynom q;
 			List<link> lst1;
 			link l;
@@ -687,9 +690,16 @@ public:
 			for (; it1 != lst.end(); it1++) {
 				for (; it2 != p.lst.end(); it2++) {
 					l.coeff = (*it1).coeff * (*it2).coeff;
-					if (((*it1).degnum + (*it2).degnum) >= 1000) {
-						std::exception ex("Big deg");
-						throw ex;
+					int a = (*it1).degnum;
+					int b = (*it2).degnum;
+					for (i = 100; i != 0; i/=10) {
+						if (a / i + b / i > 9) {
+							std::exception ex("Big deg");
+							throw ex;
+						}
+						a -= (a / i) * i;
+						b -= (b / i) * i;
+
 					}
 					l.degnum = (*it1).degnum + (*it2).degnum;
 					lst1.push_back(l);
